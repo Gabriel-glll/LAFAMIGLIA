@@ -104,7 +104,6 @@ a { color: inherit; }
 .hero-cta { display: flex; flex-wrap: wrap; gap: 12px; }
 .galeria { position: relative; overflow: hidden; padding: 10px 0 34px; -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); }
 .galeria-trilho { display: flex; gap: 18px; width: max-content; animation: desliza 60s linear infinite; }
-.galeria:hover .galeria-trilho { animation-play-state: paused; }
 .galeria img { width: clamp(300px, 38vw, 560px); aspect-ratio: 4 / 3; object-fit: cover; border-radius: 20px; border: 2px solid rgba(228, 255, 58, .25); box-shadow: var(--sombra); flex: none; }
 .galeria img:nth-child(odd) { transform: rotate(-1.5deg); }
 .galeria img:nth-child(even) { transform: rotate(1.5deg); }
