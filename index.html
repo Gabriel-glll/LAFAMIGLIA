@@ -9,15 +9,15 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%238b3dff'/><stop offset='1' stop-color='%232f3cff'/></linearGradient></defs><circle cx='50' cy='50' r='48' fill='url(%23g)'/><text x='50' y='64' font-size='44' text-anchor='middle' font-family='Arial Black' fill='%23e4ff3a'>LF</text></svg>" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&family=Permanent+Marker&family=Yellowtail&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&family=Permanent+Marker&family=Yellowtail&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div id="demo-banner" class="demo-banner" hidden>Modo demonstração — os agendamentos ficam salvos só neste navegador até o Firebase ser configurado.</div>
+  <div id="demo-banner" class="demo-banner" hidden>Modo demonstração: os agendamentos ficam salvos só neste navegador até o Firebase ser configurado.</div>
 
   <!-- ================= HEADER ================= -->
   <header class="topo" id="topo">
-    <a href="#inicio" class="marca" aria-label="La Famiglia — início">
+    <a href="#inicio" class="marca" aria-label="La Famiglia, início">
       <span class="marca-selo"><small>Barbearia</small><b>LA FAMIGLIA</b></span>
     </a>
     <nav class="menu" id="menu">
@@ -41,19 +41,22 @@
       <div class="hero-in">
         <p class="hero-script">Barbearia</p>
         <h1 class="hero-logo">LA FAMIGLIA</h1>
-        <p class="hero-frase">Aqui ninguém é cliente.<br /><span class="lime">É da família.</span></p>
-        <p class="hero-sub">Senta, pega um café, puxa a resenha. O corte sai — e sai bem feito — enquanto a gente conversa. Sumaré tem uma casa nova, e ela é sua também.</p>
+        <p class="hero-frase">💈 Sua referência em barbearia em Sumaré!<br /><span class="lime">✨ Onde o cuidado vai além do corte!</span></p>
+        <p class="hero-sub">Aqui ninguém é cliente, é da família. Senta, pega um café e puxa a resenha. O corte sai bem feito enquanto a gente conversa.</p>
         <div class="hero-cta">
           <a href="#agendar" class="btn btn-lime">Agendar meu horário</a>
           <a href="#casa" class="btn btn-ghost">Conhecer a casa</a>
         </div>
       </div>
-      <ul class="hero-faixa">
-        <li><b>Sumaré</b> Jd. Bom Retiro</li>
-        <li><b>40 min</b> por horário, sem pressa</li>
-        <li><b>Agenda</b> aberta para 2 meses</li>
-        <li><b>Família</b> em expansão</li>
-      </ul>
+      <div class="galeria" aria-label="Fotos da barbearia">
+        <div class="galeria-trilho" id="galeria-trilho">
+          <img src="img/foto1.jpg" alt="Cadeiras da barbearia" />
+          <img src="img/foto2.jpg" alt="Corte degradê sendo finalizado" />
+          <img src="img/foto3.jpg" alt="Sofá da recepção para a resenha" />
+          <img src="img/foto4.jpg" alt="Acabamento de barba na tesoura" />
+          <img src="img/foto5.jpg" alt="Salão com as cadeiras de couro" />
+        </div>
+      </div>
     </section>
 
     <!-- ================= MANIFESTO ================= -->
@@ -61,12 +64,12 @@
       <div class="wrap">
         <p class="sobre">A Casa</p>
         <h2 class="titulo">O corte é um detalhe.<br /><span class="grad">A família é o motivo.</span></h2>
-        <p class="lead">A La Famiglia nasceu pra ser aquele lugar do bairro onde você entra pra dar um tapa no visual e, quando vê, já passou a tarde. Onde o barbeiro sabe seu nome, lembra do seu time e pergunta da sua mãe. A gente acredita que barbearia boa é a que te faz voltar pelas pessoas — o cabelo na régua é consequência.</p>
+        <p class="lead">A La Famiglia nasceu pra ser aquele lugar do bairro onde você entra pra dar um tapa no visual e, quando vê, já passou a tarde. Onde o barbeiro sabe seu nome, lembra do seu time e pergunta da sua mãe. A gente acredita que barbearia boa é a que te faz voltar pelas pessoas. O cabelo na régua é consequência.</p>
         <div class="pilares">
           <article class="pilar">
             <span class="pilar-n">01</span>
             <h3>União</h3>
-            <p>Aqui a cadeira é de todo mundo. Moleque, pai, avô, amigo do amigo — chegou, é da casa.</p>
+            <p>Aqui a cadeira é de todo mundo. Moleque, pai, avô, amigo do amigo: chegou, é da casa.</p>
           </article>
           <article class="pilar">
             <span class="pilar-n">02</span>
@@ -76,7 +79,7 @@
           <article class="pilar">
             <span class="pilar-n">03</span>
             <h3>Descontração</h3>
-            <p>Ambiente leve, sem frescura e sem relógio. Vem passar o tempo — o corte acontece no caminho.</p>
+            <p>Ambiente leve, sem frescura e sem relógio. Vem passar o tempo, o corte acontece no caminho.</p>
           </article>
         </div>
       </div>
@@ -93,9 +96,9 @@
         <div>
           <p class="sobre">O Dono</p>
           <h2 class="titulo">Careca, sim.<br /><span class="lime">Especialista em cabelo, também.</span></h2>
-          <p class="lead">O Arnaldo é a prova de que ninguém precisa de cabelo pra entender de corte. Fundador da La Famiglia, ele enxerga o formato do rosto, o estilo e o momento de cada um — e transforma isso no corte certo.</p>
-          <p>Mas o que faz o pessoal voltar não é só a tesoura. É a forma como ele recebe: com nome, com história, com tempo. O Arnaldo faz mais do que cortar cabelo — <strong>ele cria experiência e conexão</strong>. Foi assim que a cadeira dele virou ponto de encontro, e o ponto de encontro virou família.</p>
-          <blockquote class="citacao">“Cabelo cresce de novo. O que eu quero é que você saia daqui com vontade de voltar.”</blockquote>
+          <p class="lead">O Arnaldo é a prova de que ninguém precisa de cabelo pra entender de corte. Fundador da La Famiglia, ele enxerga o formato do rosto, o estilo e o momento de cada um e transforma isso no corte certo.</p>
+          <p>Mas o que faz o pessoal voltar não é só a tesoura. É a forma como ele recebe: com nome, com história, com tempo. O Arnaldo faz mais do que cortar cabelo: <strong>ele cria experiência e conexão</strong>. Foi assim que a cadeira dele virou ponto de encontro, e o ponto de encontro virou família.</p>
+          <blockquote class="citacao">“Sua referência em barbearia em Sumaré! Onde o cuidado vai além do corte!”<cite>Arnaldo</cite></blockquote>
           <ul class="checks">
             <li>Leitura de rosto e estilo antes de cada corte</li>
             <li>Atendimento sem pressa, do jeito que você gosta</li>
@@ -105,26 +108,12 @@
       </div>
     </section>
 
-    <!-- ================= EXPERIÊNCIA ================= -->
-    <section class="secao experiencia">
-      <div class="wrap">
-        <p class="sobre">A Experiência</p>
-        <h2 class="titulo">Como é passar uma tarde<br />na <span class="grad">La Famiglia</span></h2>
-        <div class="exp-grid">
-          <div class="exp"><span class="exp-ico">☕</span><h3>Chega e se acomoda</h3><p>Café, água e um sofá. Ninguém aqui vai te apressar.</p></div>
-          <div class="exp"><span class="exp-ico">🗣️</span><h3>A resenha começa</h3><p>Futebol, trabalho, família, a vida. O papo é parte do serviço.</p></div>
-          <div class="exp"><span class="exp-ico">💈</span><h3>O corte acontece</h3><p>Com técnica, atenção e o acabamento que você merece.</p></div>
-          <div class="exp"><span class="exp-ico">🤝</span><h3>Sai da família</h3><p>E volta. Sempre volta. Porque aqui você tem lugar.</p></div>
-        </div>
-      </div>
-    </section>
-
     <!-- ================= SERVIÇOS ================= -->
     <section class="secao servicos" id="servicos">
       <div class="wrap">
         <p class="sobre">Serviços</p>
         <h2 class="titulo">Cardápio da casa</h2>
-        <p class="lead">Cada horário tem 40 minutos — tempo pro corte e pra conversa.</p>
+        <p class="lead">Cada horário tem 40 minutos: tempo pro corte e pra conversa.</p>
         <ul class="precos" id="lista-precos"></ul>
         <div class="centro"><a href="#agendar" class="btn btn-lime">Escolher meu horário</a></div>
       </div>
@@ -144,7 +133,7 @@
       <div class="wrap">
         <p class="sobre">Agendamento</p>
         <h2 class="titulo">Garanta sua cadeira</h2>
-        <p class="lead">Escolha o serviço, o barbeiro, o dia e o horário. Assim que você confirmar, o horário é seu — e o barbeiro já fica sabendo.</p>
+        <p class="lead">Escolha o serviço, o barbeiro, o dia e o horário. Assim que você confirmar, o horário é seu e o barbeiro já fica sabendo.</p>
 
         <div class="agenda" id="agenda">
           <ol class="passos">
@@ -177,8 +166,8 @@
               <h3><span>5</span> Seus dados</h3>
               <form id="form-agenda" class="form" novalidate>
                 <label>Nome<input name="nome" required autocomplete="name" placeholder="Como a família te chama?" /></label>
-                <label>WhatsApp<input name="whats" required inputmode="tel" autocomplete="tel" placeholder="(19) 99999-9999" /></label>
-                <label>E-mail <small>(pra receber a confirmação)</small><input name="email" type="email" autocomplete="email" placeholder="voce@email.com" /></label>
+                <label>WhatsApp<input name="whats" required inputmode="tel" autocomplete="tel" placeholder="(19) 99999 9999" /></label>
+                <label>Email <small>(pra receber a confirmação)</small><input name="email" type="email" autocomplete="email" placeholder="voce@email.com" /></label>
                 <label>Observação <small>(opcional)</small><input name="obs" maxlength="140" placeholder="Ex.: quero tirar a barba toda" /></label>
                 <div class="resumo" id="resumo"></div>
                 <button class="btn btn-lime btn-full" id="btn-confirmar" type="submit" disabled>Confirmar agendamento</button>
@@ -195,7 +184,7 @@
       <div class="wrap expansao-in">
         <p class="sobre">Em expansão</p>
         <h2 class="titulo">A família<br /><span class="grad">tá crescendo.</span></h2>
-        <p class="lead">Começou com uma cadeira e um propósito. Hoje já tem gente nova no time e muito mais por vir. Se você é barbeiro e acredita que atendimento é sobre gente, chama a gente — tem lugar na mesa.</p>
+        <p class="lead">Começou com uma cadeira e um propósito. Hoje já tem gente nova no time e muito mais por vir. Se você é barbeiro e acredita que atendimento é sobre gente, chama a gente, tem lugar na mesa.</p>
         <div class="hero-cta">
           <a class="btn btn-ghost" id="link-trabalhe" target="_blank" rel="noopener">Quero fazer parte</a>
           <a class="btn btn-ghost" id="link-insta2" target="_blank" rel="noopener">Acompanhar no Instagram</a>
@@ -224,7 +213,7 @@
   <footer class="rodape">
     <span class="marca-selo"><small>Barbearia</small><b>LA FAMIGLIA</b></span>
     <p>Onde o cuidado vai além do corte.</p>
-    <p class="mini">© <span id="ano"></span> Barbearia La Famiglia · Sumaré – SP · <a href="#" id="abrir-admin">Área do barbeiro</a></p>
+    <p class="mini">© <span id="ano"></span> Barbearia La Famiglia · Sumaré SP · <a href="#" id="abrir-admin">Área do barbeiro</a></p>
   </footer>
 
   <!-- ================= MODAL CONFIRMAÇÃO ================= -->
@@ -249,7 +238,7 @@
       <button class="fechar-x" data-fechar aria-label="Fechar">×</button>
       <h3>Área do barbeiro</h3>
       <form id="form-login" class="form">
-        <label>E-mail<input name="email" type="email" required autocomplete="username" /></label>
+        <label>Email<input name="email" type="email" required autocomplete="username" /></label>
         <label>Senha<input name="senha" type="password" required autocomplete="current-password" /></label>
         <button class="btn btn-lime btn-full">Entrar</button>
         <p class="erro" id="erro-login" role="alert"></p>

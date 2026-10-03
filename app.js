@@ -138,7 +138,7 @@ async function criarStoreFirebase() {
       if (pararAg) pararAg();
       pararAg = fs.onSnapshot(fs.query(fs.collection(db, "agendamentos"), fs.where("data", ">=", desde)), (snap) => {
         cb(snap.docs.map((d) => d.data()));
-      }, (e) => { console.error(e); toast("Sem permissão para ver os agendamentos. Confira o e-mail nas regras do Firestore."); });
+      }, (e) => { console.error(e); toast("Sem permissão para ver os agendamentos. Confira o email nas regras do Firestore."); });
     },
     async cancelar(id) {
       const b = fs.writeBatch(db); b.delete(slotRef(id)); b.delete(agRef(id)); await b.commit();
@@ -167,7 +167,7 @@ async function notificar(ag) {
       method: "POST",
       body: JSON.stringify({
         topic: barbeiro.ntfy,
-        title: `✂️ Novo agendamento — ${ag.nome}`,
+        title: `✂️ Novo agendamento: ${ag.nome}`,
         message: `${textoAgendamento(ag)}\nWhatsApp: ${ag.whats}${ag.obs ? `\nObs.: ${ag.obs}` : ""}`,
         tags: ["barber"],
         priority: 4,
@@ -184,11 +184,11 @@ async function notificar(ag) {
       emailjs.send(ej.serviceId, ej.templateId, { to_email, to_name, assunto, mensagem }, { publicKey: ej.publicKey });
     if (ag.email) {
       tarefas.push(enviar(ag.email, ag.nome, "Seu horário na La Famiglia está confirmado",
-        `Fala, ${ag.nome}! Seu horário está garantido:\n\n${textoAgendamento(ag)}\n\n${CONFIG.endereco}\n\nPrecisa remarcar? Chama no WhatsApp: https://wa.me/${CONFIG.whatsapp}\n\nTe esperamos em casa. — Família La Famiglia`));
+        `Fala, ${ag.nome}! Seu horário está garantido:\n\n${textoAgendamento(ag)}\n\n${CONFIG.endereco}\n\nPrecisa remarcar? Chama no WhatsApp: https://wa.me/${CONFIG.whatsapp}\n\nTe esperamos em casa. Família La Famiglia`));
     }
     if (barbeiro?.email) {
-      tarefas.push(enviar(barbeiro.email, barbeiro.nome, `Novo agendamento: ${ag.nome} — ${ag.data} ${ag.hora}`,
-        `${textoAgendamento(ag)}\n\nCliente: ${ag.nome}\nWhatsApp: ${ag.whats}\nE-mail: ${ag.email || "—"}\nObs.: ${ag.obs || "—"}`));
+      tarefas.push(enviar(barbeiro.email, barbeiro.nome, `Novo agendamento: ${ag.nome}, ${ag.data} ${ag.hora}`,
+        `${textoAgendamento(ag)}\n\nCliente: ${ag.nome}\nWhatsApp: ${ag.whats}\nEmail: ${ag.email || "não informado"}\nObs.: ${ag.obs || "nenhuma"}`));
     }
   }
   const res = await Promise.allSettled(tarefas);
@@ -200,7 +200,7 @@ function linkGoogleAgenda(ag) {
   const fim = new Date(ini.getTime() + CONFIG.intervaloMin * 60000);
   const f = (d) => `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
   const p = new URLSearchParams({
-    action: "TEMPLATE", text: `${ag.servicoNome} — La Famiglia`, dates: `${f(ini)}/${f(fim)}`,
+    action: "TEMPLATE", text: `${ag.servicoNome} na La Famiglia`, dates: `${f(ini)}/${f(fim)}`,
     ctz: "America/Sao_Paulo", details: `Com ${ag.barbeiroNome}. Chega um pouquinho antes pro café!`, location: CONFIG.endereco,
   });
   return { url: `https://calendar.google.com/calendar/render?${p}`, ini: f(ini), fim: f(fim) };
@@ -212,7 +212,7 @@ function arquivoIcs(ag) {
     "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//La Famiglia//Agenda//PT",
     "BEGIN:VEVENT", `UID:${ag.id}@lafamiglia`, `DTSTAMP:${ini}`,
     `DTSTART;TZID=America/Sao_Paulo:${ini}`, `DTEND;TZID=America/Sao_Paulo:${fim}`,
-    `SUMMARY:${ag.servicoNome} — La Famiglia`, `DESCRIPTION:Com ${ag.barbeiroNome}`, `LOCATION:${CONFIG.endereco.replace(/,/g, "\\,")}`,
+    `SUMMARY:${ag.servicoNome} na La Famiglia`, `DESCRIPTION:Com ${ag.barbeiroNome}`, `LOCATION:${CONFIG.endereco.replace(/,/g, "\\,")}`,
     "BEGIN:VALARM", "TRIGGER:-PT2H", "ACTION:DISPLAY", "DESCRIPTION:Seu horário na La Famiglia", "END:VALARM",
     "END:VEVENT", "END:VCALENDAR",
   ].join("\r\n");
@@ -239,7 +239,7 @@ function montarConteudo() {
   // Agrupa dias com o mesmo horário: "Terça a Sexta"
   const linhas = [];
   for (let i = 1; i <= 7; i++) {
-    const d = i % 7, f = CONFIG.funcionamento[d], txt = f ? `${f[0]} – ${f[1]}` : "Fechado";
+    const d = i % 7, f = CONFIG.funcionamento[d], txt = f ? `${f[0]} às ${f[1]}` : "Fechado";
     const ult = linhas[linhas.length - 1];
     if (ult && ult.txt === txt) ult.fim = d; else linhas.push({ ini: d, fim: d, txt });
   }
@@ -256,6 +256,10 @@ function montarConteudo() {
 }
 
 function montarInteracoes() {
+  // Duplica as fotos para o carrossel rodar sem emenda
+  const trilho = $("#galeria-trilho");
+  [...trilho.children].forEach((img) => { const c = img.cloneNode(); c.alt = ""; c.setAttribute("aria-hidden", "true"); trilho.append(c); });
+
   const btn = $("#menu-btn"), menu = $("#menu");
   btn.addEventListener("click", () => {
     const aberto = menu.classList.toggle("aberto");
@@ -266,7 +270,7 @@ function montarInteracoes() {
   document.querySelectorAll("[data-fechar]").forEach((b) => b.addEventListener("click", () => b.closest("dialog").close()));
   document.querySelectorAll("dialog").forEach((d) => d.addEventListener("click", (e) => { if (e.target === d) d.close(); }));
 
-  const alvos = document.querySelectorAll(".titulo, .lead, .pilar, .exp, .precos li, .membro, .foto-moldura, .citacao, .agenda, .mapa");
+  const alvos = document.querySelectorAll(".titulo, .lead, .pilar, .precos li, .membro, .foto-moldura, .citacao, .agenda, .mapa");
   if ("IntersectionObserver" in window) {
     const io = new IntersectionObserver((ents) => ents.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("on"); io.unobserve(e.target); } }), { threshold: .12 });
     alvos.forEach((el) => { el.classList.add("revela"); io.observe(el); });
@@ -326,7 +330,7 @@ function renderCalendario() {
     b.addEventListener("click", () => { estado.data = s; estado.hora = null; renderTudo(); });
     grade.append(b);
   }
-  $("#cal-nota").textContent = `Agenda aberta até ${fim.toLocaleDateString("pt-BR", { day: "2-digit", month: "long" })}. Toda segunda-feira libera mais uma semana.`;
+  $("#cal-nota").textContent = `Agenda aberta até ${fim.toLocaleDateString("pt-BR", { day: "2-digit", month: "long" })}. Toda segunda libera mais uma semana.`;
 }
 
 function renderHoras() {
@@ -346,7 +350,7 @@ function renderHoras() {
     b.addEventListener("click", () => { estado.hora = h; renderTudo(); });
     box.append(b);
   });
-  if (!livresNoDia(estado.barbeiro, estado.data)) box.insertAdjacentHTML("afterbegin", `<p class="vazio">Dia lotado com esse barbeiro — tenta outro dia ou outro barbeiro.</p>`);
+  if (!livresNoDia(estado.barbeiro, estado.data)) box.insertAdjacentHTML("afterbegin", `<p class="vazio">Dia lotado com esse barbeiro. Tenta outro dia ou outro barbeiro.</p>`);
 }
 
 function renderResumo() {
@@ -368,7 +372,7 @@ function montarAgenda() {
   const form = $("#form-agenda");
   form.whats.addEventListener("input", () => {
     const d = soDigitos(form.whats.value).slice(0, 11);
-    form.whats.value = d.length > 6 ? `(${d.slice(0, 2)}) ${d.slice(2, d.length - 4)}-${d.slice(-4)}` : d.length > 2 ? `(${d.slice(0, 2)}) ${d.slice(2)}` : d;
+    form.whats.value = d.length > 6 ? `(${d.slice(0, 2)}) ${d.slice(2, d.length - 4)} ${d.slice(-4)}` : d.length > 2 ? `(${d.slice(0, 2)}) ${d.slice(2)}` : d;
   });
 
   form.addEventListener("submit", async (e) => {
@@ -377,7 +381,7 @@ function montarAgenda() {
     const nome = form.nome.value.trim(), whats = form.whats.value.trim(), email = form.email.value.trim(), obs = form.obs.value.trim();
     if (nome.length < 2) return (erro.textContent = "Coloca seu nome pra gente te chamar certo.");
     if (soDigitos(whats).length < 10) return (erro.textContent = "Confere o WhatsApp com DDD.");
-    if (email && !/^\S+@\S+\.\S+$/.test(email)) return (erro.textContent = "Esse e-mail parece estar errado.");
+    if (email && !/^\S+@\S+\.\S+$/.test(email)) return (erro.textContent = "Esse email parece estar errado.");
     if (horaPassou(estado.data, estado.hora)) return (erro.textContent = "Esse horário já passou. Escolhe outro.");
 
     const s = CONFIG.servicos.find((x) => x.id === estado.servico);
@@ -443,7 +447,7 @@ function montarAdmin() {
     e.preventDefault();
     const f = e.target; $("#erro-login").textContent = "";
     try { await store.entrar(f.email.value.trim(), f.senha.value); f.reset(); }
-    catch (err) { $("#erro-login").textContent = MODO_DEMO ? err.message : "E-mail ou senha incorretos."; }
+    catch (err) { $("#erro-login").textContent = MODO_DEMO ? err.message : "Email ou senha incorretos."; }
   });
   $("#btn-sair").addEventListener("click", () => store.sair());
 
@@ -485,9 +489,9 @@ function renderAdmin() {
     const id = slotId(barbeiro, data, h), s = estado.slots[id];
     const b = document.createElement("button"); b.type = "button"; b.className = "hora"; b.textContent = h;
     if (s?.tipo === "reserva") { b.classList.add("reserv"); b.title = "Reservado"; b.disabled = true; }
-    else if (s?.tipo === "bloqueio") { b.classList.add("bloq"); b.title = "Bloqueado — toque para liberar"; b.onclick = () => store.liberar(id).catch(() => toast("Erro ao liberar.")); }
+    else if (s?.tipo === "bloqueio") { b.classList.add("bloq"); b.title = "Bloqueado, toque para liberar"; b.onclick = () => store.liberar(id).catch(() => toast("Erro ao liberar.")); }
     else if (horaPassou(data, h)) { b.disabled = true; }
-    else { b.title = "Livre — toque para bloquear"; b.onclick = () => store.bloquear(id, barbeiro, data, h).catch(() => toast("Erro ao bloquear.")); }
+    else { b.title = "Livre, toque para bloquear"; b.onclick = () => store.bloquear(id, barbeiro, data, h).catch(() => toast("Erro ao bloquear.")); }
     grade.append(b);
   });
 }
