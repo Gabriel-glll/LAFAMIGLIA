@@ -1,0 +1,33 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ⚠️ Troque pelos e-mails dos barbeiros cadastrados no Firebase Authentication.
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email in ['arnaldo@lafamiglia.com', 'miqueias@lafamiglia.com'];
+    }
+
+    // Horários ocupados (público, sem dados do cliente).
+    // "create" em um doc que já existe conta como "update" → negado.
+    // É isso que impede dois clientes de reservarem o mesmo horário.
+    match /slots/{id} {
+      allow read: if true;
+      allow create: if isAdmin()
+        || (request.resource.data.tipo == 'reserva'
+            && existsAfter(/databases/$(database)/documents/agendamentos/$(id)));
+      allow delete: if isAdmin();
+      allow update: if false;
+    }
+
+    // Dados do cliente (privado: só os barbeiros leem).
+    match /agendamentos/{id} {
+      allow create: if request.resource.data.id == id
+        && getAfter(/databases/$(database)/documents/slots/$(id)).data.tipo == 'reserva'
+        && request.resource.data.nome is string && request.resource.data.nome.size() <= 80
+        && request.resource.data.whats is string && request.resource.data.whats.size() <= 20;
+      allow read, delete: if isAdmin();
+      allow update: if false;
+    }
+  }
+}
