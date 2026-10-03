@@ -13,7 +13,6 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div id="demo-banner" class="demo-banner" hidden>Modo demonstração: os agendamentos ficam salvos só neste navegador até o Firebase ser configurado.</div>
 
   <!-- ================= HEADER ================= -->
   <header class="topo" id="topo">
@@ -248,9 +247,8 @@
       <button class="fechar-x" data-fechar aria-label="Fechar">×</button>
       <h3>Área do barbeiro</h3>
       <form id="form-login" class="form">
-        <label>Email<input name="email" type="email" required autocomplete="username" /></label>
-        <label>Senha<input name="senha" type="password" required autocomplete="current-password" /></label>
-        <button class="btn btn-lime btn-full">Entrar</button>
+        <p class="mini">Entre com a conta Google cadastrada como barbeiro.</p>
+        <button class="btn btn-lime btn-full">Entrar com Google</button>
         <p class="erro" id="erro-login" role="alert"></p>
       </form>
       <div id="painel" hidden>

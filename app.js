@@ -76,10 +76,7 @@ function criarStoreLocal() {
       const ags = ler(K_AG); ags[ag.id] = ag;
       gravar(K_SLOTS, slots); gravar(K_AG, ags); avisar();
     },
-    async entrar(email, senha) {
-      if (senha !== "famiglia") throw new Error("Senha do modo demonstração: famiglia");
-      localStorage.setItem(K_ADM, email); avisar();
-    },
+    async entrar() { localStorage.setItem(K_ADM, "demo"); avisar(); },
     async sair() { localStorage.removeItem(K_ADM); avisar(); },
     observarAdmin(cb) { const f = () => cb(!!localStorage.getItem(K_ADM)); ouvintes.add(f); f(); },
     observarAgendamentos(desde, cb) {
@@ -131,7 +128,7 @@ async function criarStoreFirebase() {
         throw e;
       }
     },
-    async entrar(email, senha) { await au.signInWithEmailAndPassword(auth, email, senha); },
+    async entrar() { await au.signInWithPopup(auth, new au.GoogleAuthProvider()); },
     async sair() { if (pararAg) pararAg(); await au.signOut(auth); },
     observarAdmin(cb) { au.onAuthStateChanged(auth, (u) => cb(!!u)); },
     observarAgendamentos(desde, cb) {
@@ -266,25 +263,20 @@ function montarInteracoes() {
 // =====================================================================
 //  Agendamento
 // =====================================================================
-const estado = { servico: CONFIG.servicos[0]?.id, barbeiro: "qualquer", data: null, hora: null, mes: null, slots: {} };
+const estado = { servico: CONFIG.servicos[0]?.id, barbeiro: CONFIG.barbeiros[0]?.id, data: null, hora: null, mes: null, slots: {} };
 let store;
 
 function ocupado(barbeiro, data, hora) { return !!estado.slots[slotId(barbeiro, data, hora)]; }
 
-// Barbeiros livres naquele horário (respeitando a escolha do cliente)
+// Barbeiro escolhido está livre naquele horário?
 function barbeirosLivres(data, hora) {
   if (horaPassou(data, hora)) return [];
-  const lista = estado.barbeiro === "qualquer" ? CONFIG.barbeiros : CONFIG.barbeiros.filter((b) => b.id === estado.barbeiro);
-  return lista.filter((b) => !ocupado(b.id, data, hora));
+  return CONFIG.barbeiros.filter((b) => b.id === estado.barbeiro && !ocupado(b.id, data, hora));
 }
 
 function horasLivres(data) { return horariosDoDia(deIso(data)).filter((h) => barbeirosLivres(data, h).length); }
 
-// "Qualquer um": fica com o barbeiro que tem menos clientes no dia
-function escolherBarbeiro(data, hora) {
-  const carga = (b) => horariosDoDia(deIso(data)).filter((h) => ocupado(b.id, data, h)).length;
-  return barbeirosLivres(data, hora).sort((a, b) => carga(a) - carga(b))[0];
-}
+function escolherBarbeiro(data, hora) { return barbeirosLivres(data, hora)[0]; }
 
 function chip(texto, sub, ativo, onclick) {
   const b = document.createElement("button");
@@ -298,8 +290,8 @@ function renderChips() {
   const cs = $("#chips-servico"); cs.replaceChildren();
   CONFIG.servicos.forEach((s) => cs.append(chip(s.nome, real(s.preco), estado.servico === s.id, () => { estado.servico = s.id; renderTudo(); })));
   const cb = $("#chips-barbeiro"); cb.replaceChildren();
-  [{ id: "qualquer", nome: "Qualquer um", sub: "o primeiro livre" }, ...CONFIG.barbeiros].forEach((b) =>
-    cb.append(chip(b.nome, b.sub, estado.barbeiro === b.id, () => {
+  CONFIG.barbeiros.forEach((b) =>
+    cb.append(chip(b.nome, "", estado.barbeiro === b.id, () => {
       estado.barbeiro = b.id; estado.hora = null; renderTudo();
     })));
 }
@@ -338,7 +330,7 @@ function renderHoras() {
   $("#hora-dia").textContent = estado.data ? deIso(estado.data).toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "2-digit" }) : "";
   if (!estado.data) { box.innerHTML = `<p class="vazio">Toque em um dia do calendário e os horários livres aparecem aqui.</p>`; return; }
   const livres = horasLivres(estado.data);
-  if (!livres.length) { box.innerHTML = `<p class="vazio">Esse dia já está lotado. Tenta outro dia${estado.barbeiro !== "qualquer" ? " ou outro barbeiro" : ""}.</p>`; return; }
+  if (!livres.length) { box.innerHTML = `<p class="vazio">Esse dia já está lotado. Tenta outro dia ou outro barbeiro.</p>`; return; }
   livres.forEach((h) => {
     const b = document.createElement("button");
     b.type = "button"; b.className = "hora"; b.textContent = h;
@@ -356,7 +348,7 @@ function renderResumo() {
   const pronto = !!(s && estado.data && estado.hora);
   $("#form-agenda").hidden = !pronto;
   if (!pronto) return;
-  const b = estado.barbeiro === "qualquer" ? null : CONFIG.barbeiros.find((x) => x.id === estado.barbeiro);
+  const b = CONFIG.barbeiros.find((x) => x.id === estado.barbeiro);
   $("#resumo").innerHTML = `<b>${esc(s.nome)}</b> · ${real(s.preco)}<br>${maiuscula(dataLonga(estado.data))} às <b>${estado.hora}</b>${b ? ` com <b>${esc(b.nome)}</b>` : ""}`;
   $("#btn-confirmar").disabled = false;
 }
@@ -441,9 +433,9 @@ function montarAdmin() {
 
   $("#form-login").addEventListener("submit", async (e) => {
     e.preventDefault();
-    const f = e.target; $("#erro-login").textContent = "";
-    try { await store.entrar(f.email.value.trim(), f.senha.value); f.reset(); }
-    catch (err) { $("#erro-login").textContent = MODO_DEMO ? err.message : "Email ou senha incorretos."; }
+    $("#erro-login").textContent = "";
+    try { await store.entrar(); }
+    catch (err) { console.error(err); $("#erro-login").textContent = "Não foi possível entrar. Tente de novo."; }
   });
   $("#btn-sair").addEventListener("click", () => store.sair());
 
@@ -498,7 +490,6 @@ function renderAdmin() {
 async function iniciar() {
   montarConteudo();
   montarInteracoes();
-  if (MODO_DEMO) $("#demo-banner").hidden = false;
   try { store = MODO_DEMO ? criarStoreLocal() : await criarStoreFirebase(); }
   catch (e) { console.error(e); toast("Erro ao conectar com a agenda."); store = criarStoreLocal(); }
 

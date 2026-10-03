@@ -5,7 +5,7 @@
 
 export const CONFIG = {
   // WhatsApp da barbearia (só números, com 55 + DDD). Usado nos botões de contato.
-  whatsapp: "5519999999999",
+  whatsapp: "5519981212925",
   instagram: "https://www.instagram.com/barbearialafamigliaa/",
   endereco: "R. Mário Paijão, 231, Jd. Bom Retiro, Sumaré SP",
 
