@@ -144,48 +144,47 @@
       <div class="wrap">
         <p class="sobre">Agendamento</p>
         <h2 class="titulo">Garanta sua cadeira</h2>
-        <p class="lead">Escolha o serviço, o barbeiro, o dia e o horário. Assim que você confirmar, o horário é seu e o barbeiro já fica sabendo.</p>
+        <p class="lead">Escolha o dia e veja na hora os horários livres. Confirmou, é seu: o barbeiro recebe o aviso no WhatsApp.</p>
 
         <div class="agenda" id="agenda">
-          <ol class="passos">
-            <li class="passo" id="p-servico">
+          <div class="ag-col">
+            <div class="passo">
               <h3><span>1</span> Serviço</h3>
               <div class="chips" id="chips-servico"></div>
-            </li>
-            <li class="passo" id="p-barbeiro">
+            </div>
+            <div class="passo">
               <h3><span>2</span> Barbeiro</h3>
               <div class="chips" id="chips-barbeiro"></div>
-            </li>
-            <li class="passo" id="p-data">
-              <h3><span>3</span> Dia</h3>
-              <div class="cal">
-                <div class="cal-topo">
-                  <button type="button" class="cal-nav" id="cal-prev" aria-label="Mês anterior">‹</button>
-                  <strong id="cal-mes"></strong>
-                  <button type="button" class="cal-nav" id="cal-next" aria-label="Próximo mês">›</button>
-                </div>
-                <div class="cal-sem"><span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span></div>
-                <div class="cal-dias" id="cal-dias"></div>
-                <p class="cal-nota" id="cal-nota"></p>
+            </div>
+          </div>
+          <div class="ag-col passo">
+            <h3><span>3</span> Dia</h3>
+            <div class="cal">
+              <div class="cal-topo">
+                <button type="button" class="cal-nav" id="cal-prev" aria-label="Mês anterior">‹</button>
+                <strong id="cal-mes"></strong>
+                <button type="button" class="cal-nav" id="cal-next" aria-label="Próximo mês">›</button>
               </div>
-            </li>
-            <li class="passo" id="p-hora">
-              <h3><span>4</span> Horário</h3>
-              <div class="horas" id="horas"><p class="vazio">Escolha um dia no calendário.</p></div>
-            </li>
-            <li class="passo" id="p-dados">
+              <div class="cal-sem"><span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span></div>
+              <div class="cal-dias" id="cal-dias"></div>
+              <p class="cal-nota" id="cal-nota"></p>
+            </div>
+          </div>
+          <div class="ag-col">
+            <div class="passo" id="p-hora">
+              <h3><span>4</span> Horário <small id="hora-dia"></small></h3>
+              <div class="horas" id="horas"></div>
+            </div>
+            <form id="form-agenda" class="passo form" novalidate hidden>
               <h3><span>5</span> Seus dados</h3>
-              <form id="form-agenda" class="form" novalidate>
-                <label>Nome<input name="nome" required autocomplete="name" placeholder="Como a família te chama?" /></label>
-                <label>WhatsApp<input name="whats" required inputmode="tel" autocomplete="tel" placeholder="(19) 99999 9999" /></label>
-                <label>Email <small>(pra receber a confirmação)</small><input name="email" type="email" autocomplete="email" placeholder="voce@email.com" /></label>
-                <label>Observação <small>(opcional)</small><input name="obs" maxlength="140" placeholder="Ex.: quero tirar a barba toda" /></label>
-                <div class="resumo" id="resumo"></div>
-                <button class="btn btn-lime btn-full" id="btn-confirmar" type="submit" disabled>Confirmar agendamento</button>
-                <p class="erro" id="erro-form" role="alert"></p>
-              </form>
-            </li>
-          </ol>
+              <input name="nome" required autocomplete="name" placeholder="Seu nome" aria-label="Nome" />
+              <input name="whats" required inputmode="tel" autocomplete="tel" placeholder="Seu WhatsApp (19) 99999 9999" aria-label="WhatsApp" />
+              <input name="obs" maxlength="140" placeholder="Observação (opcional)" aria-label="Observação" />
+              <div class="resumo" id="resumo"></div>
+              <button class="btn btn-lime btn-full" id="btn-confirmar" type="submit" disabled>Confirmar agendamento</button>
+              <p class="erro" id="erro-form" role="alert"></p>
+            </form>
+          </div>
         </div>
       </div>
     </section>
@@ -234,11 +233,11 @@
       <h3 class="modal-logo">FAMIGLIA!</h3>
       <p id="ok-texto"></p>
       <div class="ok-acoes">
-        <a class="btn btn-lime" id="ok-gcal" target="_blank" rel="noopener">Adicionar ao Google Agenda</a>
-        <a class="btn btn-ghost" id="ok-ics">Baixar lembrete (.ics)</a>
-        <a class="btn btn-ghost" id="ok-whats" target="_blank" rel="noopener">Mandar no WhatsApp da barbearia</a>
+        <a class="btn btn-lime" id="ok-whats" target="_blank" rel="noopener">Receber confirmação no WhatsApp</a>
+        <a class="btn btn-ghost" id="ok-gcal" target="_blank" rel="noopener">Adicionar ao Google Agenda</a>
+        <a class="btn btn-ghost" id="ok-ics">Baixar lembrete no celular</a>
       </div>
-      <p class="mini" id="ok-email"></p>
+      <p class="mini">O barbeiro já recebeu seu agendamento no WhatsApp e vai te confirmar por lá.</p>
       <button class="btn btn-sm btn-ghost" data-fechar>Fechar</button>
     </div>
   </dialog>

@@ -161,42 +161,45 @@ a { color: inherit; }
 
 /* ---------- agenda ---------- */
 .agendar { background: radial-gradient(circle at 20% 0%, rgba(139, 61, 255, .25), transparent 50%), radial-gradient(circle at 90% 100%, rgba(47, 60, 255, .25), transparent 50%), var(--bg); }
-.agenda { margin-top: 40px; background: rgba(28, 19, 66, .75); border: 1px solid var(--linha); border-radius: 26px; padding: clamp(18px, 4vw, 40px); box-shadow: var(--sombra); }
-.passos { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 34px 40px; }
-#p-servico, #p-barbeiro { grid-column: 1 / -1; }
-.passo h3 { display: flex; align-items: center; gap: 10px; font-size: 1.1rem; margin-bottom: 14px; }
-.passo h3 span { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--grad); font: 800 1rem "Baloo 2", system-ui, sans-serif; }
-.chips { display: flex; flex-wrap: wrap; gap: 10px; }
-.chip { padding: 11px 18px; border-radius: 14px; border: 1.5px solid var(--linha); background: var(--bg2); color: var(--texto); font: 600 .9rem "Nunito", sans-serif; cursor: pointer; transition: .15s; text-align: left; }
-.chip small { display: block; font-weight: 500; color: var(--suave); font-size: .78rem; }
+.agenda { margin-top: 30px; background: rgba(28, 19, 66, .75); border: 1px solid var(--linha); border-radius: 24px; padding: clamp(16px, 2.5vw, 26px); box-shadow: var(--sombra); display: grid; grid-template-columns: 1fr 320px 1fr; gap: 26px; align-items: start; }
+.ag-col { display: grid; gap: 20px; align-content: start; }
+.passo h3 { display: flex; align-items: center; gap: 8px; font-size: 1rem; margin-bottom: 10px; }
+.passo h3 small { font-weight: 600; color: var(--lime); font-size: .85rem; margin-left: auto; }
+.passo h3 span { width: 24px; height: 24px; font-size: .85rem !important; border-radius: 50%; display: grid; place-items: center; background: var(--grad); font: 800 1rem "Baloo 2", system-ui, sans-serif; }
+.chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.chip { padding: 8px 13px; border-radius: 12px; border: 1.5px solid var(--linha); background: var(--bg2); color: var(--texto); font: 700 .85rem "Nunito", sans-serif; cursor: pointer; transition: .15s; text-align: left; }
+.chip small { display: block; font-weight: 600; color: var(--suave); font-size: .72rem; }
 .chip:hover { border-color: var(--roxo); }
 .chip[aria-pressed="true"] { background: var(--lime); color: #14092e; border-color: var(--lime); }
 .chip[aria-pressed="true"] small { color: #3a2a6b; }
 
-.cal { background: var(--bg2); border-radius: 18px; padding: 16px; border: 1px solid var(--linha); }
-.cal-topo { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-.cal-nav { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--linha); background: none; color: #fff; font-size: 1.3rem; cursor: pointer; }
+.cal { background: var(--bg2); border-radius: 16px; padding: 12px; border: 1px solid var(--linha); }
+.cal-topo { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; font-size: .95rem; }
+.cal-nav { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--linha); background: none; color: #fff; font-size: 1.3rem; cursor: pointer; }
 .cal-nav:disabled { opacity: .25; cursor: default; }
-.cal-sem, .cal-dias { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+.cal-sem, .cal-dias { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; text-align: center; }
 .cal-sem span { font-size: .72rem; color: var(--suave); font-weight: 700; padding: 4px 0; }
-.dia { aspect-ratio: 1; border-radius: 10px; border: 0; background: rgba(255, 255, 255, .05); color: var(--texto); font: 600 .9rem "Nunito", sans-serif; cursor: pointer; position: relative; }
+.dia { height: 36px; border-radius: 9px; border: 0; background: rgba(255, 255, 255, .05); color: var(--texto); font: 700 .85rem "Nunito", sans-serif; cursor: pointer; position: relative; }
 .dia:hover:not(:disabled) { background: rgba(139, 61, 255, .35); }
 .dia:disabled { background: none; color: rgba(255, 255, 255, .18); cursor: default; }
-.dia.hoje::after { content: ""; position: absolute; bottom: 5px; left: 50%; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--lime); }
+.dia.hoje::after { content: ""; position: absolute; bottom: 3px; left: 50%; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--lime); }
 .dia[aria-pressed="true"] { background: var(--lime); color: #14092e; }
 .dia.lotado:not(:disabled) { text-decoration: line-through; color: var(--suave); }
-.cal-nota { font-size: .78rem; color: var(--suave); margin-top: 10px; }
+.cal-nota { font-size: .72rem; color: var(--suave); margin-top: 8px; line-height: 1.4; }
 
-.horas { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 8px; }
-.hora { padding: 11px 0; border-radius: 10px; border: 1.5px solid rgba(228, 255, 58, .35); background: transparent; color: var(--texto); font: 700 .92rem "Nunito", sans-serif; cursor: pointer; transition: .15s; }
+.horas { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 6px; }
+.hora { padding: 8px 0; border-radius: 9px; border: 1.5px solid rgba(228, 255, 58, .35); background: transparent; color: var(--texto); font: 700 .85rem "Nunito", sans-serif; cursor: pointer; transition: .15s; animation: surge .25s ease both; }
+@keyframes surge { from { opacity: 0; transform: translateY(6px); } }
 .hora:hover:not(:disabled) { background: rgba(228, 255, 58, .12); }
 .hora[aria-pressed="true"] { background: var(--lime); color: #14092e; border-color: var(--lime); }
 .hora:disabled { border-color: transparent; background: rgba(255, 255, 255, .04); color: rgba(255, 255, 255, .25); text-decoration: line-through; cursor: not-allowed; }
 .hora.bloq { border-color: #ff5d7a; color: #ff9db0; text-decoration: none; background: rgba(255, 93, 122, .1); cursor: pointer; }
 .hora.reserv { border-color: transparent; background: rgba(139, 61, 255, .3); color: #fff; text-decoration: none; cursor: default; }
-.vazio { color: var(--suave); font-size: .92rem; grid-column: 1 / -1; }
+.vazio { color: var(--suave); font-size: .88rem; grid-column: 1 / -1; background: var(--bg2); border: 1px dashed var(--linha); border-radius: 12px; padding: 14px; }
 
-.form { display: grid; gap: 14px; }
+.form { display: grid; gap: 10px; }
+.agenda .form h3 { margin-bottom: 0; }
+.agenda .form input { padding: 10px 13px; font-size: .92rem; }
 .form label { display: grid; gap: 6px; font-weight: 600; font-size: .88rem; }
 .form label small { font-weight: 400; color: var(--suave); }
 .form input, .painel-topo select, #adm-data {
@@ -204,9 +207,10 @@ a { color: inherit; }
   background: var(--bg2); color: var(--texto); font: 500 1rem "Nunito", sans-serif; color-scheme: dark;
 }
 .form input:focus, #adm-data:focus { outline: none; border-color: var(--lime); }
-.resumo { background: var(--bg2); border-radius: 14px; padding: 14px 16px; font-size: .9rem; color: var(--suave); border: 1px dashed var(--linha); }
+.resumo { background: var(--bg2); border-radius: 12px; padding: 10px 13px; font-size: .85rem; color: var(--suave); border: 1px dashed var(--linha); }
 .resumo b { color: var(--texto); }
-.erro { color: #ff8da1; font-size: .88rem; min-height: 1.2em; }
+.erro { color: #ff8da1; font-size: .85rem; }
+.erro:empty { display: none; }
 
 /* ---------- expansão ---------- */
 .expansao { background: var(--grad); overflow: hidden; }
@@ -252,6 +256,10 @@ a { color: inherit; }
 .revela.on { opacity: 1; transform: none; }
 
 /* ---------- responsivo ---------- */
+@media (max-width: 1100px) and (min-width: 901px) {
+  .agenda { grid-template-columns: 1fr 1fr; }
+  .agenda > .ag-col:first-child { grid-column: 1 / -1; }
+}
 @media (max-width: 900px) {
   .hero-topo { flex-direction: column; }
   .hero-foto { position: relative; width: 100%; height: 62vh; order: -1; }
@@ -263,7 +271,7 @@ a { color: inherit; }
   .menu a:not(.btn) { padding: 14px 0; width: 100%; border-bottom: 1px solid var(--linha); font-size: 1rem; }
   .menu .btn { margin-top: 16px; width: 100%; }
   .menu-btn { display: block; }
-  .pilares, .arnaldo-grid, .onde-grid, .passos, .precos { grid-template-columns: 1fr; }
+  .pilares, .arnaldo-grid, .onde-grid, .agenda, .precos { grid-template-columns: 1fr; }
   .arnaldo-grid { gap: 36px; }
   .exp-grid { grid-template-columns: 1fr 1fr; }
   .secao { padding: 80px 0; }

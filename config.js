@@ -10,11 +10,11 @@ export const CONFIG = {
   endereco: "R. Mário Paijão, 231, Jd. Bom Retiro, Sumaré SP",
 
   // Barbeiros que atendem pelo agendamento.
-  // ntfy: tópico do app ntfy (notificação no celular do barbeiro). Use um nome difícil de adivinhar.
-  // email: recebe o aviso por e-mail (precisa do EmailJS configurado lá embaixo).
+  // whatsapp + callmebot: o barbeiro recebe cada agendamento no próprio WhatsApp (veja o LEIA-ME).
+  // ntfy (opcional): tópico do app ntfy, pra receber também como notificação push.
   barbeiros: [
-    { id: "arnaldo", nome: "Arnaldo", papel: "Fundador · especialista em cortes", ntfy: "lafamiglia-arnaldo-7x9k2", email: "" },
-    { id: "miqueias", nome: "Miqueias", papel: "Barbeiro · o mais novo da família", ntfy: "lafamiglia-miqueias-4p8w1", email: "" },
+    { id: "arnaldo", nome: "Arnaldo", papel: "Fundador · especialista em cortes", whatsapp: "", callmebot: "", ntfy: "" },
+    { id: "miqueias", nome: "Miqueias", papel: "Barbeiro · o mais novo da família", whatsapp: "", callmebot: "", ntfy: "" },
   ],
 
   // Serviços (cada agendamento ocupa um horário de 40 min).
@@ -54,12 +54,5 @@ export const CONFIG = {
     storageBucket: "",
     messagingSenderId: "",
     appId: "",
-  },
-
-  // ---------- EMAILJS (e-mail para cliente e barbeiro) — opcional ----------
-  emailjs: {
-    publicKey: "",
-    serviceId: "",
-    templateId: "",
   },
 };

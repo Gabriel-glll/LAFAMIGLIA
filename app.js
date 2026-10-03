@@ -14,7 +14,7 @@ const slotId = (barbeiro, data, hora) => `${barbeiro}_${data}_${hora.replace(":"
 const soDigitos = (s) => (s || "").replace(/\D/g, "");
 const foneWa = (s) => { const d = soDigitos(s); return d.length <= 11 ? "55" + d : d; };
 const maiuscula = (s) => s.charAt(0).toUpperCase() + s.slice(1);
-const dataLonga = (s) => deIso(s).toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" });
+const dataLonga = (s) => deIso(s).toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" }).replace("-feira", "");
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const DIAS = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
 
@@ -159,37 +159,23 @@ function textoAgendamento(ag) {
 
 async function notificar(ag) {
   const barbeiro = CONFIG.barbeiros.find((b) => b.id === ag.barbeiro);
+  if (!barbeiro) return;
+  // Link pronto pro barbeiro confirmar com o cliente em um toque
+  const confirmar = `https://wa.me/${foneWa(ag.whats)}?text=${encodeURIComponent(`Fala, ${ag.nome}! Aqui é o ${barbeiro.nome} da La Famiglia. Seu horário está confirmado: ${ag.servicoNome}, ${dataLonga(ag.data)} às ${ag.hora}. Te esperamos!`)}`;
+  const texto = `✂️ *Novo agendamento*\n\n*${ag.nome}*\n${ag.servicoNome}\n${maiuscula(dataLonga(ag.data))} às *${ag.hora}*\nWhatsApp: ${ag.whats}${ag.obs ? `\nObs.: ${ag.obs}` : ""}\n\nConfirmar com o cliente: ${confirmar}`;
   const tarefas = [];
 
-  // 1) Push no celular do barbeiro (app ntfy — grátis, sem cadastro)
-  if (barbeiro?.ntfy) {
+  // 1) WhatsApp do barbeiro (CallMeBot, grátis)
+  if (barbeiro.whatsapp && barbeiro.callmebot) {
+    const url = `https://api.callmebot.com/whatsapp.php?phone=${soDigitos(barbeiro.whatsapp)}&apikey=${encodeURIComponent(barbeiro.callmebot)}&text=${encodeURIComponent(texto)}`;
+    tarefas.push(fetch(url, { mode: "no-cors" }));
+  }
+  // 2) Push no celular (app ntfy), opcional
+  if (barbeiro.ntfy) {
     tarefas.push(fetch("https://ntfy.sh/", {
       method: "POST",
-      body: JSON.stringify({
-        topic: barbeiro.ntfy,
-        title: `✂️ Novo agendamento: ${ag.nome}`,
-        message: `${textoAgendamento(ag)}\nWhatsApp: ${ag.whats}${ag.obs ? `\nObs.: ${ag.obs}` : ""}`,
-        tags: ["barber"],
-        priority: 4,
-        click: `https://wa.me/${foneWa(ag.whats)}`,
-      }),
+      body: JSON.stringify({ topic: barbeiro.ntfy, title: `✂️ Novo agendamento: ${ag.nome}`, message: texto.replace(/\*/g, ""), priority: 4, click: confirmar }),
     }));
-  }
-
-  // 2) E-mail para cliente e barbeiro (EmailJS, se configurado)
-  const ej = CONFIG.emailjs;
-  if (ej.publicKey && ej.serviceId && ej.templateId) {
-    const emailjs = (await import("https://cdn.jsdelivr.net/npm/@emailjs/browser@4/+esm")).default;
-    const enviar = (to_email, to_name, assunto, mensagem) =>
-      emailjs.send(ej.serviceId, ej.templateId, { to_email, to_name, assunto, mensagem }, { publicKey: ej.publicKey });
-    if (ag.email) {
-      tarefas.push(enviar(ag.email, ag.nome, "Seu horário na La Famiglia está confirmado",
-        `Fala, ${ag.nome}! Seu horário está garantido:\n\n${textoAgendamento(ag)}\n\n${CONFIG.endereco}\n\nPrecisa remarcar? Chama no WhatsApp: https://wa.me/${CONFIG.whatsapp}\n\nTe esperamos em casa. Família La Famiglia`));
-    }
-    if (barbeiro?.email) {
-      tarefas.push(enviar(barbeiro.email, barbeiro.nome, `Novo agendamento: ${ag.nome}, ${ag.data} ${ag.hora}`,
-        `${textoAgendamento(ag)}\n\nCliente: ${ag.nome}\nWhatsApp: ${ag.whats}\nEmail: ${ag.email || "não informado"}\nObs.: ${ag.obs || "nenhuma"}`));
-    }
   }
   const res = await Promise.allSettled(tarefas);
   res.filter((r) => r.status === "rejected").forEach((r) => console.warn("Falha ao notificar:", r.reason));
@@ -280,13 +266,24 @@ function montarInteracoes() {
 // =====================================================================
 //  Agendamento
 // =====================================================================
-const estado = { servico: null, barbeiro: null, data: null, hora: null, mes: null, slots: {} };
+const estado = { servico: CONFIG.servicos[0]?.id, barbeiro: "qualquer", data: null, hora: null, mes: null, slots: {} };
 let store;
 
 function ocupado(barbeiro, data, hora) { return !!estado.slots[slotId(barbeiro, data, hora)]; }
 
-function livresNoDia(barbeiro, data) {
-  return horariosDoDia(deIso(data)).filter((h) => !ocupado(barbeiro, data, h) && !horaPassou(data, h)).length;
+// Barbeiros livres naquele horário (respeitando a escolha do cliente)
+function barbeirosLivres(data, hora) {
+  if (horaPassou(data, hora)) return [];
+  const lista = estado.barbeiro === "qualquer" ? CONFIG.barbeiros : CONFIG.barbeiros.filter((b) => b.id === estado.barbeiro);
+  return lista.filter((b) => !ocupado(b.id, data, hora));
+}
+
+function horasLivres(data) { return horariosDoDia(deIso(data)).filter((h) => barbeirosLivres(data, h).length); }
+
+// "Qualquer um": fica com o barbeiro que tem menos clientes no dia
+function escolherBarbeiro(data, hora) {
+  const carga = (b) => horariosDoDia(deIso(data)).filter((h) => ocupado(b.id, data, h)).length;
+  return barbeirosLivres(data, hora).sort((a, b) => carga(a) - carga(b))[0];
 }
 
 function chip(texto, sub, ativo, onclick) {
@@ -301,9 +298,10 @@ function renderChips() {
   const cs = $("#chips-servico"); cs.replaceChildren();
   CONFIG.servicos.forEach((s) => cs.append(chip(s.nome, real(s.preco), estado.servico === s.id, () => { estado.servico = s.id; renderTudo(); })));
   const cb = $("#chips-barbeiro"); cb.replaceChildren();
-  CONFIG.barbeiros.forEach((b) => cb.append(chip(b.nome, b.papel, estado.barbeiro === b.id, () => {
-    estado.barbeiro = b.id; estado.hora = null; renderTudo();
-  })));
+  [{ id: "qualquer", nome: "Qualquer um", sub: "o primeiro livre" }, ...CONFIG.barbeiros].forEach((b) =>
+    cb.append(chip(b.nome, b.sub, estado.barbeiro === b.id, () => {
+      estado.barbeiro = b.id; estado.hora = null; renderTudo();
+    })));
 }
 
 function renderCalendario() {
@@ -322,12 +320,14 @@ function renderCalendario() {
     const b = document.createElement("button");
     b.type = "button"; b.className = "dia"; b.textContent = d;
     const aberto = data >= hoje && data <= fim && horariosDoDia(data).length > 0;
-    const lotado = aberto && estado.barbeiro && livresNoDia(estado.barbeiro, s) === 0;
     b.disabled = !aberto;
-    if (lotado) { b.classList.add("lotado"); b.title = "Sem horários livres"; }
+    if (aberto && !horasLivres(s).length) { b.classList.add("lotado"); b.title = "Sem horários livres"; }
     if (s === iso(hoje)) b.classList.add("hoje");
     b.setAttribute("aria-pressed", estado.data === s);
-    b.addEventListener("click", () => { estado.data = s; estado.hora = null; renderTudo(); });
+    b.addEventListener("click", () => {
+      estado.data = s; estado.hora = null; renderTudo();
+      if (matchMedia("(max-width: 900px)").matches) $("#p-hora").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
     grade.append(b);
   }
   $("#cal-nota").textContent = `Agenda aberta até ${fim.toLocaleDateString("pt-BR", { day: "2-digit", month: "long" })}. Toda segunda libera mais uma semana.`;
@@ -335,32 +335,30 @@ function renderCalendario() {
 
 function renderHoras() {
   const box = $("#horas"); box.replaceChildren();
-  if (!estado.barbeiro || !estado.data) {
-    box.innerHTML = `<p class="vazio">${!estado.barbeiro ? "Escolha um barbeiro." : "Escolha um dia no calendário."}</p>`;
-    return;
-  }
-  const hs = horariosDoDia(deIso(estado.data));
-  hs.forEach((h) => {
+  $("#hora-dia").textContent = estado.data ? deIso(estado.data).toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "2-digit" }) : "";
+  if (!estado.data) { box.innerHTML = `<p class="vazio">Toque em um dia do calendário e os horários livres aparecem aqui.</p>`; return; }
+  const livres = horasLivres(estado.data);
+  if (!livres.length) { box.innerHTML = `<p class="vazio">Esse dia já está lotado. Tenta outro dia${estado.barbeiro !== "qualquer" ? " ou outro barbeiro" : ""}.</p>`; return; }
+  livres.forEach((h) => {
     const b = document.createElement("button");
     b.type = "button"; b.className = "hora"; b.textContent = h;
-    const indisponivel = ocupado(estado.barbeiro, estado.data, h) || horaPassou(estado.data, h);
-    b.disabled = indisponivel;
-    b.title = indisponivel ? "Indisponível" : "Disponível";
     b.setAttribute("aria-pressed", estado.hora === h);
-    b.addEventListener("click", () => { estado.hora = h; renderTudo(); });
+    b.addEventListener("click", () => {
+      estado.hora = h; renderTudo();
+      $("#form-agenda").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
     box.append(b);
   });
-  if (!livresNoDia(estado.barbeiro, estado.data)) box.insertAdjacentHTML("afterbegin", `<p class="vazio">Dia lotado com esse barbeiro. Tenta outro dia ou outro barbeiro.</p>`);
 }
 
 function renderResumo() {
   const s = CONFIG.servicos.find((x) => x.id === estado.servico);
-  const b = CONFIG.barbeiros.find((x) => x.id === estado.barbeiro);
-  const pronto = s && b && estado.data && estado.hora;
-  $("#resumo").innerHTML = pronto
-    ? `<b>${esc(s.nome)}</b> com <b>${esc(b.nome)}</b><br>${dataLonga(estado.data)} às <b>${estado.hora}</b> · ${real(s.preco)}`
-    : "Complete os passos acima para ver o resumo.";
-  $("#btn-confirmar").disabled = !pronto;
+  const pronto = !!(s && estado.data && estado.hora);
+  $("#form-agenda").hidden = !pronto;
+  if (!pronto) return;
+  const b = estado.barbeiro === "qualquer" ? null : CONFIG.barbeiros.find((x) => x.id === estado.barbeiro);
+  $("#resumo").innerHTML = `<b>${esc(s.nome)}</b> · ${real(s.preco)}<br>${maiuscula(dataLonga(estado.data))} às <b>${estado.hora}</b>${b ? ` com <b>${esc(b.nome)}</b>` : ""}`;
+  $("#btn-confirmar").disabled = false;
 }
 
 function renderTudo() { renderChips(); renderCalendario(); renderHoras(); renderResumo(); }
@@ -378,18 +376,18 @@ function montarAgenda() {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const erro = $("#erro-form"); erro.textContent = "";
-    const nome = form.nome.value.trim(), whats = form.whats.value.trim(), email = form.email.value.trim(), obs = form.obs.value.trim();
+    const nome = form.nome.value.trim(), whats = form.whats.value.trim(), obs = form.obs.value.trim();
     if (nome.length < 2) return (erro.textContent = "Coloca seu nome pra gente te chamar certo.");
     if (soDigitos(whats).length < 10) return (erro.textContent = "Confere o WhatsApp com DDD.");
-    if (email && !/^\S+@\S+\.\S+$/.test(email)) return (erro.textContent = "Esse email parece estar errado.");
     if (horaPassou(estado.data, estado.hora)) return (erro.textContent = "Esse horário já passou. Escolhe outro.");
 
     const s = CONFIG.servicos.find((x) => x.id === estado.servico);
-    const b = CONFIG.barbeiros.find((x) => x.id === estado.barbeiro);
+    const b = escolherBarbeiro(estado.data, estado.hora);
+    if (!b) { estado.hora = null; renderTudo(); return toast("Esse horário acabou de ser reservado. Escolhe outro!"); }
     const ag = {
       id: slotId(b.id, estado.data, estado.hora),
       barbeiro: b.id, barbeiroNome: b.nome, servico: s.id, servicoNome: s.nome, preco: s.preco,
-      data: estado.data, hora: estado.hora, nome, whats, email, obs,
+      data: estado.data, hora: estado.hora, nome, whats, obs,
     };
 
     const btn = $("#btn-confirmar");
@@ -400,7 +398,7 @@ function montarAgenda() {
       btn.textContent = "Confirmar agendamento";
       if (err.message === "ocupado") {
         estado.hora = null; renderTudo();
-        erro.textContent = "Poxa, alguém da família acabou de pegar esse horário. Escolhe outro!";
+        toast("Poxa, alguém da família acabou de pegar esse horário. Escolhe outro!");
       } else {
         console.error(err); renderResumo();
         erro.textContent = "Não deu pra salvar agora. Verifique sua internet e tente de novo.";
@@ -416,11 +414,9 @@ function montarAgenda() {
 
 function mostrarConfirmacao(ag) {
   $("#ok-texto").innerHTML = `<b>${esc(ag.nome)}</b>, sua cadeira está garantida:<br><b class="lime">${esc(ag.servicoNome)}</b> com ${esc(ag.barbeiroNome)}<br>${dataLonga(ag.data)} às <b>${ag.hora}</b>`;
+  $("#ok-whats").href = `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(`Fala, família! Agendei pelo site:\n\n${textoAgendamento(ag)}\nNome: ${ag.nome}\n\nMe confirma por aqui?`)}`;
   $("#ok-gcal").href = linkGoogleAgenda(ag).url;
   const ics = $("#ok-ics"); ics.href = arquivoIcs(ag); ics.download = "la-famiglia.ics";
-  $("#ok-whats").href = `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(`Fala, família! Acabei de agendar pelo site:\n${textoAgendamento(ag)}\nNome: ${ag.nome}`)}`;
-  const temEmail = CONFIG.emailjs.publicKey && ag.email;
-  $("#ok-email").textContent = temEmail ? `Mandamos a confirmação para ${ag.email}.` : "O barbeiro já foi avisado. Salve o lembrete na sua agenda pra não esquecer!";
   $("#modal-ok").showModal();
 }
 
